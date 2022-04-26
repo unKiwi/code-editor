@@ -1,0 +1,265 @@
+/*********************************************************************
+** ---------------------- Copyright notice ---------------------------
+** This source code is part of the EVASoft project
+** It is property of Alain Boute Ingenierie - www.abing.fr and is
+** distributed under the GNU Public Licence version 2
+** Commercial use is submited to licencing - contact eva@abing.fr
+** -------------------------------------------------------------------
+**        File : CodeEditor.css
+** Description : The style of the module
+**      Author : Luc TORRES
+**     Created : Apr 2022
+*********************************************************************/
+
+/* variable */
+:root {
+    --EVA-CodeEditor-bg-primary: #ffffff;
+	--EVA-CodeEditor-bg-secondary: #f1f3f4;
+	--EVA-CodeEditor-bg-hover: #eaeaea;
+	--EVA-CodeEditor-bg-selected-primary: #e8f0fe;
+	--EVA-CodeEditor-bg-selected-secondary: #1a73e8;
+    --EVA-CodeEditor-text-color-primary: #5f6368;
+	--EVA-CodeEditor-border-primary: #cdcdcd;
+	--EVA-CodeEditor-line-height: 19px;
+}
+
+/* root */
+.EVA_CodeEditor_wrap {
+	background: var(--EVA-CodeEditor-bg-primary);
+	border: 1px solid var(--EVA-CodeEditor-border-primary);
+}
+
+/* toolbar */
+.EVA_CodeEditor_toolbar {
+    display: flex;
+	flex-wrap: wrap;
+	border-bottom: 1px solid var(--EVA-CodeEditor-border-primary);
+	padding: 0 2px;
+}
+.EVA_CodeEditor_tbPart {
+	display: flex;
+	margin: 3px 0px;
+}
+.EVA_CodeEditor_separator {
+	color: var(--EVA-CodeEditor-text-color-primary);
+	margin: 0px 3px;
+	padding-top: 1px;
+}
+.EVA_CodeEditor_toolbar select {
+	background: var(--EVA-CodeEditor-bg-primary);
+	color: var(--EVA-CodeEditor-text-color-primary);
+	border: 0px;
+	border-radius: 3px;
+}
+.EVA_CodeEditor_tbElement {
+	background: var(--EVA-CodeEditor-bg-primary);
+	border: 0px;
+	border-radius: 3px;
+	padding-top: 2px;
+	margin: 0 1px;
+}
+.EVA_CodeEditor_tbElement:hover, .EVA_CodeEditor_toolbar select:hover {
+	background: var(--EVA-CodeEditor-bg-secondary);
+	cursor: pointer;
+}
+.EVA_CodeEditor_toolbar i, .EVA_CodeEditor_toolbar button {
+	color: var(--EVA-CodeEditor-text-color-primary);
+}
+.EVA_CodeEditor_selected {
+	background: var(--EVA-CodeEditor-bg-selected-primary);
+	color: var(--EVA-CodeEditor-bg-selected-secondary);
+}
+.EVA_CodeEditor_selected i, .EVA_CodeEditor_selected>*:first-child {
+	color: var(--EVA-CodeEditor-bg-selected-secondary);
+}
+
+/* editor */
+.EVA_CodeEditor_editor {
+	display: flex;
+}
+/* line numbers */
+.EVA_CodeEditor_editor > div:first-child {
+	padding: 2px 2px 2px 20px;
+
+	border-right: 1px solid var(--EVA-CodeEditor-border-primary);
+	overflow-y: auto;
+	-ms-overflow-style: none;  /* IE and Edge */
+  	scrollbar-width: none;  /* Firefox */
+}
+.EVA_CodeEditor_editor > div:first-child::-webkit-scrollbar {
+	display: none;
+}
+.EVA_CodeEditor_editor > div:first-child > div {
+	height: var(--EVA-CodeEditor-line-height);
+	text-align: end;
+}
+/* content editable */
+[contenteditable] {
+	padding: 2px;
+
+	resize: both;
+    outline: 0px solid transparent;
+}
+.EVA_CodeEditor_contenteditableCode {
+	overflow: auto;
+
+	white-space: pre;
+	tab-size: 4;
+	caret-color: #000000;
+}
+.EVA_CodeEditor_contenteditableCode > div {
+	height: var(--EVA-CodeEditor-line-height);
+}
+.EVA_CodeEditor_contenteditableHtml {
+	overflow-x: hidden;
+	overflow-y: auto;
+	word-wrap: break-word;
+}
+.EVA_CodeEditor_contenteditableHtml a {
+	cursor: pointer;
+}
+/* same property */
+.EVA_CodeEditor_editor > div:first-child, .EVA_CodeEditor_contenteditableCode {
+	font-family: Consolas, "Courier New", monospace;
+}
+
+/* bottom toolbar */
+.EVA_CodeEditor_wrap > div:last-child {
+    background: var(--EVA-CodeEditor-bg-secondary);
+}
+.EVA_CodeEditor_wrap > div:last-child > button {
+    background: none;
+	color: var(--EVA-CodeEditor-text-color-primary);
+	border: none;
+	cursor: pointer;
+	padding: 3px 7px;
+}
+.EVA_CodeEditor_wrap > div:last-child > button:hover {
+    background: var(--EVA-CodeEditor-bg-hover);
+}
+
+/* img, link popup */
+#EVA_CodeEditor_popupImgLinkBtn {
+	position: absolute;
+	background: var(--EVA-CodeEditor-bg-primary);
+	padding: 10px;
+	border: 1px solid var(--EVA-CodeEditor-border-primary);
+}
+#EVA_CodeEditor_popupImgLinkBtn .EVA_CodeEditor_text {
+	display: block;
+	margin-bottom: 7px;
+}
+#EVA_CodeEditor_popupImgLinkBtn .EVA_CodeEditor_embeddedImage, #EVA_CodeEditor_popupImgLinkBtn .EVA_CodeEditor_target, #EVA_CodeEditor_popupImgLinkBtn .EVA_CodeEditor_title {
+	margin-top: 7px;
+}
+#EVA_CodeEditor_popupImgLinkBtn .EVA_CodeEditor_btnGroup {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 7px;
+}
+#EVA_CodeEditor_popupImgLinkBtn button {
+	border: 0;
+	border-radius: 3px;
+	background: var(--EVA-CodeEditor-bg-primary);
+	cursor: pointer;
+}
+#EVA_CodeEditor_popupImgLinkBtn button:hover {
+	background: var(--EVA-CodeEditor-bg-secondary);
+}
+#EVA_CodeEditor_popupImgLinkBtn button:last-child {
+	margin-left: 10px;
+}
+
+/* color popup */
+#EVA_CodeEditor_popupColorBtn {
+	position: absolute;
+	background: var(--EVA-CodeEditor-bg-primary);
+	padding: 10px;
+	border: 1px solid var(--EVA-CodeEditor-border-primary);
+}
+#EVA_CodeEditor_popupColorBtn span {
+	text-transform: uppercase;
+	color: var(--EVA-CodeEditor-text-color-primary);
+}
+#EVA_CodeEditor_popupColorBtn .EVA_CodeEditor_custom {
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+
+	padding-bottom: 10px;
+	margin: 10px 0;
+	border-bottom: 1px solid var(--EVA-CodeEditor-border-primary);
+}
+#EVA_CodeEditor_popupColorBtn .EVA_CodeEditor_default {
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+}
+#EVA_CodeEditor_popupColorBtn .EVA_CodeEditor_default button {
+	height: 24px;
+	width: 24px;
+	margin: 1px;
+	border-radius: 12px;
+	border-width: 1px;
+	cursor: pointer;
+}
+#EVA_CodeEditor_popupColorBtn .EVA_CodeEditor_transparent {
+	margin-top: 3px;
+	width: 100%;
+	
+	background: var(--EVA-CodeEditor-bg-primary);
+	color: var(--EVA-CodeEditor-text-color-primary);
+
+	border: 1px solid var(--EVA-CodeEditor-border-primary);
+	border-radius: 12px;
+
+	cursor: pointer;
+}
+#EVA_CodeEditor_popupColorBtn .EVA_CodeEditor_transparent i {
+	margin-right: 5px;
+}
+
+/* link */
+#EVA_CodeEditor_popupLinkInfo {
+	display: flex;
+	position: absolute;
+	background: var(--EVA-CodeEditor-bg-primary);
+	padding: 5px;
+	border: 1px solid var(--EVA-CodeEditor-border-primary);
+	border-radius: 3px;
+}
+#EVA_CodeEditor_popupLinkInfo a {
+	margin-right: 20px;
+}
+#EVA_CodeEditor_popupLinkInfo button {
+	border: 0;
+	border-radius: 3px;
+	background: var(--EVA-CodeEditor-bg-primary);
+	margin-left: 3px;
+	cursor: pointer;
+}
+#EVA_CodeEditor_popupLinkInfo button:hover {
+	background: var(--EVA-CodeEditor-bg-secondary);
+}
+#EVA_CodeEditor_popupLinkInfo .EVA_CodeEditor_popupLinkInfo_edit input {
+	margin-right: 5px;
+}
+
+/* image */
+.EVA_CodeEditor_ce img {
+	cursor: move;
+}
+#EVA_CodeEditor_resizeableDiv {
+	position: absolute;
+	resize: both;
+	overflow: auto;
+}
+
+/* mask */
+#EVA_CodeEditor_popupMask {
+	background: rgba(0, 0, 0, 0.1);
+
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}

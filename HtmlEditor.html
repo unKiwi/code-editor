@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link href="HtmlEditor.css" rel="stylesheet">
+	<script type="module" src="HtmlEditor.mjs"></script>
+	<script src="https://kit.fontawesome.com/3ae285e3b5.js" crossorigin="anonymous"></script>
+	<script>
+		let a;
+		a++;
+	</script>
+</head>
+<body>
+    <template id="EVA_CodeEditor_template">
+		<div class="EVA_CodeEditor_wrap">
+            <div class="EVA_CodeEditor_editor">
+                <div>
+					<div>1</div>
+				</div>
+                <div contenteditable spellcheck="false"></div>
+            </div>
+            <div class="EVA_CodeEditor_bottomToolbar">
+                <button type="button" title="Pretty print">{ }</button>
+            </div>
+		</div>
+
+		<div id="EVA_CodeEditor_popupImgLinkBtn">
+			<input class="EVA_CodeEditor_text" type="text">
+			<input class="EVA_CodeEditor_link" type="url">
+			<div class="EVA_CodeEditor_embeddedImage">
+				<input id="EVA_CodeEditor_checkboxAAA" type="checkbox">
+				<label for="EVA_CodeEditor_checkboxAAA"></label>
+			</div>
+			<div class="EVA_CodeEditor_target">
+				<input id="EVA_CodeEditor_checkboxAAB" type="checkbox">
+				<label for="EVA_CodeEditor_checkboxAAB"></label>
+			</div>
+			<input class="EVA_CodeEditor_title" type="text">
+			<div class="EVA_CodeEditor_btnGroup">
+				<button class="EVA_CodeEditor_validate"></button>
+			</div>
+		</div>
+
+		<div id="EVA_CodeEditor_popupColorBtn">
+			<!-- <span></span>\
+			<div class="EVA_CodeEditor_custom">
+				<i class="fas fa-plus"></i>
+			</div> -->
+			<div class="EVA_CodeEditor_default"></div>
+			<button class="EVA_CodeEditor_transparent"></button>
+		</div>
+
+		<div id="EVA_CodeEditor_popupLinkInfo">
+			<div class="EVA_CodeEditor_popupLinkInfo_opt">
+				<a target="_blank"></a>
+				<button><i class="far fa-copy"></i></button>
+				<button><i class="fas fa-edit"></i></button>
+				<button><i class="fas fa-unlink"></i></button>
+			</div>
+			<div class="EVA_CodeEditor_popupLinkInfo_edit">
+				<input type="text">
+				<input type="text">
+				<button></button>
+			</div>
+		</div>
+	</template>
+
+	<form id="form">
+		<h1>Texte area 1</h1>
+		<textarea class="EVA_HtmlEditorSmall" style="height: 400px; width: 700px;"></textarea>
+
+		<div class="EVA_HtmlEditor">
+			<h2>Texte area 2</h2>
+			<textarea style="height: 400px; width: 700px;"></textarea>
+		</div>
+		
+		<h3>Texte area 3</h3>
+		<textarea class="EVA_HtmlEditorLarge" style="height: 400px; width: 700px;"></textarea>
+
+		<h4>Texte area 4</h4>
+		<textarea class="EVA_HtmlCodeEditor" style="height: 400px; width: 700px;"></textarea>
+
+        <h5>Texte area 5</h5>
+		<textarea class="EVA_CssEditor" style="height: 400px; width: 700px;"></textarea>
+
+        <h6>Texte area 6</h6>
+		<textarea class="EVA_JsEditor" style="height: 400px; width: 700px;"></textarea>
+	</form>
+</body>
+</html>
