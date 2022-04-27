@@ -125,95 +125,95 @@ let setCursorOffset = (element, offset) => {
 }
 
 let minify = (code, lang) => {
+	console.log("minify", lang)
 	if (lang == "html") {
+		// blocks: comment and pre tag
+		let lsLine = code.trim().split('\n');
 
+		let inComment = false;
+		let inTagNoMinify = "";
+
+		for (let i = 0; i < lsLine.length; i++) {
+			let currentLine = lsLine[i];
+			let trimCondition = (!inComment && inTagNoMinify == "");
+
+			if (trimCondition) lsLine[i] = lsLine[i].trimStart();
+
+			for (let j = 0; j < lsLine[i].length; j++) {
+				let currentChar = currentLine[j];
+
+				if (inComment) {
+					// find "-->"
+					let model = "-->";
+					let index = currentLine.substring(j).indexOf(model);
+					if (index !== -1) {
+						inComment = false;
+						j += index + model.length - 1;
+					}
+					else break;
+				}
+
+				else if (inTagNoMinify) {
+					// find "</"
+					let model = `</${inTagNoMinify}`;
+					let index = currentLine.substring(j).indexOf(model);
+					if (index !== -1) {
+						inTagNoMinify = "";
+						j += index + model.length - 1;
+					}
+					else break;
+				}
+
+				else if (currentChar == "<") {
+					let tag = currentLine.substring(j + 1, j + 4);
+					if (currentLine.substring(j + 1, j + 4) == "!--") {
+						inComment = true;
+						j += 3;
+						break;
+					}
+					else if (currentLine.substring(j + 1, j + 4) == "pre") {
+						inTagNoMinify = "pre";
+						break;
+					}
+					else if (currentLine.substring(j + 1, j + 6) == "style") {
+						inTagNoMinify = "style";
+						break;
+					}
+					else if (currentLine.substring(j + 1, j + 7) == "script") {
+						inTagNoMinify = "script";
+						break;
+					}
+				}
+			}
+
+			if (trimCondition) lsLine[i] = lsLine[i].trimEnd();
+		}
+
+		return lsLine.join("\n");
 	}
+	else if (lang == "css") {
+		// blocks: 
+		let lsLine = code.trim().split('\n').map(line => line.trim());
 
-	return code;
-	// // trim row if we aren't in string
+		// remove doubble lines
+		for (let i = 0; i < lsLine.length; i++) {
+			if (i < lsLine.length - 1) {
+				let isEmpty = (str) => {
+					let match = str.match(/\s+/g);
+					if (match) return match.length == 1;
+					return false;
+				}
 
-	// let counter = (i, j) => {
-	// 	let counter = 0;
-	// 	let k = 1;
-	// 	while (true) {
-	// 		if (rows[i][j - k] == "\\") {
-	// 			counter++;
-	// 			k++;
-	// 		}
-	// 		else {
-	// 			break;
-	// 		}
-	// 	}
-
-	// 	return counter % 2 == 0;
-	// }
-
-	// let rows = code.trim()
-	// .replaceAll(/\n\n(\n)+/g, "\n\n")
-	// .split('\n');
-	// let strIdentifier = "";
-	// let inComment = false;
-	
-	// for (let i = 0; i < rows.length; i++) {
-	// 	for (let j = 0; j < rows[i].length; j++) {
-	// 		// in comment
-	// 		if (inComment) {
-	// 			if (rows[i][j] == "*" && rows[i][j + 1] == "/") {
-	// 				inComment = false;
-	// 				j++;
-	// 			}
-	// 		}
-
-	// 		// in string
-	// 		else if (strIdentifier !== "") {
-	// 			if (counter(i, j) && rows[i][j] == strIdentifier) {
-	// 				strIdentifier = "";
-	// 			}
-	// 		}
-
-	// 		// out
-	// 		else {
-	// 			if (j == 0) {
-	// 				rows[i] = rows[i].trimStart();
-	// 			}
-
-	// 			// enter in string
-	// 			if (rows[i][j] == "'" || rows[i][j] == "\"" || rows[i][j] == "`" && rows[i][j - 1] !== "\\") {
-	// 				if (counter(i, j)) {
-	// 					strIdentifier = rows[i][j];
-	// 				}
-	// 			}
-	// 			// enter in comment
-	// 			else if (rows[i][j] == "/") {
-	// 				// comment //
-	// 				if (rows[i][j + 1] == "/") {
-	// 					// go to next line
-	// 					rows[i] = rows[i].trimEnd();
-	// 					break;
-	// 				}
-	// 				// comment /*/
-	// 				else if (rows[i][j + 1] == "*") {
-	// 					inComment = true;
-	// 					j++;
-	// 				}
-	// 				// regex
-	// 				else {
-	// 					let match = rows[i].substring(j, rows[i].length).match(this.conf.syntaxColor.var[3].regex);
-	// 					if (match) {
-	// 						let regexLength = match[0].length;
-	// 						j += regexLength;
-	// 					}
-	// 				}
-	// 			}
-
-	// 			if (j == rows[i].length - 1) {
-	// 				rows[i] = rows[i].trimEnd();
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	// return rows.join("\n");
+				if (isEmpty(lsLine[i]) && isEmpty(lsLine[i + 1])) {
+					// remove next line
+					console.log("remove line")
+					lsLine.splice(i + 1, 1);
+				}
+			}
+		}
+		
+		return lsLine.join("\n");
+	}
 }
 
 // class
@@ -235,7 +235,7 @@ class CodeEditor {
 		this.contentEditable.innerText = this.textarea.innerHTML;
 		this.contentEditable.className = "EVA_CodeEditor_contenteditableCode";
 
-		this.textarea.style.display = "none";
+		// this.textarea.style.display = "none";
 		this.textarea.insertAdjacentElement("beforebegin", this.wrap);
 
 		this.beautify();
@@ -291,6 +291,53 @@ class CodeEditor {
 		});
 
 		// shortcut
+		this.contentEditable.addEventListener("paste", evt => {
+			if (!this.inCodeMode()) return;
+
+			// stop evt
+			evt.preventDefault();
+
+			// get text to paste
+			let paste = (evt.clipboardData || window.clipboardData).getData('text').split('\n');
+
+			// get row where cursor is
+			let row = this.getTopDiv(window.getSelection().getRangeAt(0).startContainer);
+
+			// remove selection
+			document.execCommand("insertText", false, '');
+
+			// split this row by the cursor offset
+			let cursorOffset = getCursorOffset(row);
+			if (cursorOffset == -3) cursorOffset = 0;
+			let rowPart = [
+				row.innerText.substring(0, cursorOffset),
+				row.innerText.substring(cursorOffset, row.innerText.length).replaceAll('\n', ''),
+			];
+
+			if (paste.length == 1) {
+				document.execCommand("insertText", false, paste[0]);
+			}
+			else {
+				// insert first row
+				row.innerText = rowPart[0] + paste[0];
+				// insert rest of row
+				let lastRow = row;
+				for (let i = 1; i < paste.length; i++) {
+					// create div
+					let row = document.createElement('div');
+					// fill div
+					row.innerText = paste[i];
+					// insert div after last row
+					lastRow.insertAdjacentElement('afterend', row);
+					lastRow = row;
+				}
+				// insert last row
+				lastRow.innerText = lastRow.innerText + rowPart[1];
+
+				// set focus on row
+				setCursorOffset(lastRow, paste[paste.length - 1].length);
+			}
+		});
 		this.contentEditable.addEventListener("keydown", evt => {
 			this.timout();
 
@@ -436,7 +483,7 @@ class CodeEditor {
 	save() {
 		if (!this.inCodeMode()) return;
 		
-		this.textarea.value = minify(this.contentEditable.innerText, this.getCodeLang());
+		this.textarea.value = minify(this.getCode(), this.getCodeLang());
 	}
 
 	updateNumRow() {
@@ -479,14 +526,17 @@ class CodeEditor {
 	getCode() {
 		if (!this.inCodeMode()) return;
 
-		let lsDiv = this.contentEditable.getElementsByTagName("div");
+		let lsDiv = this.contentEditable.childNodes;
 		let code = [];
 		for (let i = 0; i < lsDiv.length; i++) {
-			code.push(lsDiv[i].innerText);
-		}
-		code = code.join("\n");
+			let line = lsDiv[i].innerText;
+			// remove last "\n" if exist
+			if (line[line.length - 1] == "\n") line = line.substring(0, line.length - 1);
 
-		return code;
+			code.push(line);
+		}
+
+		return code.join("\n");
 	}
 
 	setCode(code) {
@@ -726,7 +776,7 @@ class Wysiwyg extends CodeEditor {
 					this.edit("underline");
 					evt.preventDefault();
 				}
-				else if (e.key == "g") {
+				else if (evt.key == "g") {
 					this.edit("bold");
 					evt.preventDefault();
 				}

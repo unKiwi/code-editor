@@ -153,6 +153,9 @@ const conf = {
 		EVA_JsEditor: {
 			codeLanguage: "js",
 		},
+		EVA_SqlEditor: {
+			codeLanguage: "sql",
+		},
 	},
 	btnDef: {
 		selectAll: {
