@@ -1,27 +1,25 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<link href="HtmlEditor.css" rel="stylesheet">
 	<script type="module" src="HtmlEditor.mjs"></script>
 	<script src="https://kit.fontawesome.com/3ae285e3b5.js" crossorigin="anonymous"></script>
-	<script>
-		let a;
-		a++;
-	</script>
+	<link href="HtmlEditor.css" rel="stylesheet">
 </head>
+
 <body>
-    <template id="EVA_CodeEditor_template">
+	<template id="EVA_CodeEditor_template">
 		<div class="EVA_CodeEditor_wrap">
-            <div class="EVA_CodeEditor_editor">
-                <div>
+			<div class="EVA_CodeEditor_editor">
+				<div>
 					<div>1</div>
 				</div>
-                <div contenteditable spellcheck="false"></div>
-            </div>
-            <div class="EVA_CodeEditor_bottomToolbar">
-                <button type="button" title="Pretty print">{ }</button>
-            </div>
+				<div contenteditable spellcheck="false"></div>
+			</div>
+			<div class="EVA_CodeEditor_bottomToolbar">
+				<button type="button" title="Pretty print">{ }</button>
+			</div>
 		</div>
 
 		<div id="EVA_CodeEditor_popupImgLinkBtn">
@@ -73,21 +71,22 @@
 			<h1>normal</h1>
 			<textarea style="height: 400px; width: 700px;"></textarea>
 		</div>
-		
+
 		<h1>large</h1>
 		<textarea class="EVA_HtmlEditorLarge" style="height: 400px; width: 700px;"></textarea>
 
 		<h1>html</h1>
 		<textarea class="EVA_HtmlCodeEditor" style="height: 400px; width: 700px;"></textarea>
 
-        <h1>css</h1>
+		<h1>css</h1>
 		<textarea class="EVA_CssEditor" style="height: 400px; width: 700px;"></textarea>
 
-        <h1>js</h1>
+		<h1>js</h1>
 		<textarea class="EVA_JsEditor" style="height: 400px; width: 700px;"></textarea>
 
 		<h1>sql</h1>
 		<textarea class="EVA_SqlEditor" style="height: 400px; width: 700px;"></textarea>
 	</form>
 </body>
+
 </html>

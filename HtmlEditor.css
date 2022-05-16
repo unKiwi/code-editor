@@ -16,6 +16,7 @@
     --EVA-CodeEditor-bg-primary: #ffffff;
 	--EVA-CodeEditor-bg-secondary: #f1f3f4;
 	--EVA-CodeEditor-bg-hover: #eaeaea;
+	--EVA-CodeEditor-bg-selection: #CFE8FC;
 	--EVA-CodeEditor-bg-selected-primary: #e8f0fe;
 	--EVA-CodeEditor-bg-selected-secondary: #1a73e8;
     --EVA-CodeEditor-text-color-primary: #5f6368;
@@ -76,6 +77,12 @@
 /* editor */
 .EVA_CodeEditor_editor {
 	display: flex;
+}
+.EVA_CodeEditor_editor ::-moz-selectio {
+	background: var(--EVA-CodeEditor-bg-selection);
+}
+.EVA_CodeEditor_editor ::selection {
+	background: var(--EVA-CodeEditor-bg-selection);
 }
 /* line numbers */
 .EVA_CodeEditor_editor > div:first-child {

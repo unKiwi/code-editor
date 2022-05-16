@@ -13,87 +13,104 @@
 
 const conf = {
 	language: navigator.language.substring(0, 2),
+	lsColor: {
+		comment: "#6a993e", // green
+		string: "#ce915b", // orange
+		expSQL: "#C586C0", // pink
+		keyWordPrimary: "#569cb3", // blue
+		keyWordSecondary: "#c586b6", // purple
+	},
 	lsCodeLanguage: {
 		html: {
-			lsBlockToIndent: ["blockquote", "div", "ol", "ul", "li", "p"],
+			// demo: [
+			// 	{name: "head", start: "<head", end: "</head", indent: true, explode: true, minify: true, color: "comment"},
+			// ],
+			lsBlockToParse: ["blockquote", "div", "ol", "ul", "li", "p", "tr", "td", "tbody", "thead", "table", "body", "head", "style", "pre", "button"],
+			lsStrToIndent: [
+				{str: "<head", action: "indent"},
+				{str: "</head", action: "outdent"},
+				{str: "<p", action: "indent"},
+				{str: "</p", action: "outdent"},
+				{str: "<span", action: "indent"},
+				{str: "</span", action: "outdent"},
+				{str: "<ul", action: "indent"},
+				{str: "</ul", action: "outdent"},
+				{str: "<ol", action: "indent"},
+				{str: "</ol", action: "outdent"},
+				{str: "<li", action: "indent"},
+				{str: "</li", action: "outdent"},
+				{str: "<div", action: "indent"},
+				{str: "</div", action: "outdent"},
+				{str: "<button", action: "indent"},
+				{str: "</button", action: "outdent"},
+			],
+			lsBlockNoMinify: [
+				{start: '<!--', end: '-->', type: "comment"},
+				{start: '<pre', end: '</pre>'},
+				{start: '<style', end: '</style>'},
+				{start: '<script', end: '</script>'},
+			],
 			syntaxColor: {
-				var: [
-					{
-						regex: /<!--[\s\S]*?-->/g, // comment
-						color: "#6a993e" // green
-					},
-					{
-						regex: /('(?:[^'\\]|\\.)*')|("(?:[^"\\]|\\.)*")/g, // string
-						color: "#ce915b" // orange
-					},
-					{
-						regex: /\{\{.*\}\}/g, // sql
-						color: "#C586C0" // pink
-					},
-				],
+				const: [],
 			},
 		},
 		css: {
-			lsBlockToIndent: ["{}"],
+			lsStrToIndent: [
+				{str: "{", action: "indent"},
+				{str: "}", action: "outdent"},
+			],
+			lsBlockNoMinify: [
+				{start: '/*', end: '*/', type: "comment"},
+			],
 			syntaxColor: {
-				var: [
-					{
-						regex: /(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)/g, // comment
-						color: "#6a993e" // green
-					},
-					{
-						regex: /\{\{.*\}\}/g, // sql
-						color: "#C586C0" // pink
-					}
-				],
+				const: [],
 			},
-		},
+		},//*
 		js: {
-			lsBlockToIndent: ["{}", "[]"],
+			lsStrToIndent: [
+				{str: "{", action: "indent"},
+				{str: "}", action: "outdent"},
+
+				{str: "[", action: "indent"},
+				{str: "]", action: "outdent"},
+
+				{str: "(", action: "indent"},
+				{str: ")", action: "outdent"},
+			],
+			lsBlockNoMinify: [
+				{start: '/*', end: '*/', type: "comment"},
+				{start: '//', end: '\n', type: "comment"},
+				{start: '\'', end: '\'', escape: "\\", type: "string"},
+				{start: '"', end: '"', escape: "\\", type: "string"},
+				{start: '`', end: '`', escape: "\\", type: "string"},
+			],
 			syntaxColor: {
 				const: [
 					{
-						words: ["var", "let", "const", "function", "class", "this", "=>", "typeof", "false", "true", "null", "undefined", "new", "style"],
-						color: "#569cb3" // blue
+						lsWord: ["var", "let", "const", "function", "class", "this", "=>", "typeof", "false", "true", "null", "undefined", "new", "style", "Infinity"],
+						color: "keyWordPrimary",
 					},
 					{
-						words: ["if", "else", "return", "break", "for", "while"],
-						color: "#c586b6" // purple
-					},
-				],
-				var: [
-					{
-						regex: /((\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)|(\/\/.*))/g, // comment
-						color: "#6a993e" // green
-					},
-					{
-						regex: /('(?:[^'\\]|\\.)*')|("(?:[^"\\]|\\.)*")|(`(?:[^`\\]|\\.)*`)/g, // string
-						color: "#ce915b" // orange
-					},
-					{
-						regex: /\{\{.*\}\}/g, // sql
-						color: "#C586C0" // pink
+						lsWord: ["if", "else", "return", "break", "for", "while"],
+						color: "keyWordSecondary",
 					},
 				],
 			},
 		},
 		sql: {
-			lsBlockToIndent: ["()"],
+			lsStrToIndent: [
+				{str: "(", action: "indent"},
+				{str: ")", action: "outdent"},
+			],
+			lsBlockNoMinify: [
+				{start: '--', end: '\n', type: "comment"},
+				{start: '#', end: '\n', type: "comment"},
+			],
 			syntaxColor: {
 				const: [
 					{
-						words: ["SELECT", "FROM", "JOIN", "WHERE"],
-						color: "#569cb3" // blue
-					},
-				],
-				var: [
-					{
-						regex: /--.*/g, // comment
-						color: "#6a993e" // green
-					},
-					{
-						regex: /'(?:[^'\\]|\\.)*'/g, // string
-						color: "#ce915b" // orange
+						lsWord: ["SELECT", "FROM", "JOIN", "WHERE"],
+						color: "keyWordPrimary",
 					},
 				],
 			},
@@ -1303,7 +1320,7 @@ const conf = {
 				},
 			},
 			target: {
-				content: "Open in new tab",
+				content: "Open start new tab",
 				contentLanguage: {
 					fr: "S'ouvre dans un nouvel onglet"
 				},

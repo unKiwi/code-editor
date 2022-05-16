@@ -124,98 +124,6 @@ let setCursorOffset = (element, offset) => {
 	return offset;
 }
 
-let minify = (code, lang) => {
-	console.log("minify", lang)
-	if (lang == "html") {
-		// blocks: comment and pre tag
-		let lsLine = code.trim().split('\n');
-
-		let inComment = false;
-		let inTagNoMinify = "";
-
-		for (let i = 0; i < lsLine.length; i++) {
-			let currentLine = lsLine[i];
-			let trimCondition = (!inComment && inTagNoMinify == "");
-
-			if (trimCondition) lsLine[i] = lsLine[i].trimStart();
-
-			for (let j = 0; j < lsLine[i].length; j++) {
-				let currentChar = currentLine[j];
-
-				if (inComment) {
-					// find "-->"
-					let model = "-->";
-					let index = currentLine.substring(j).indexOf(model);
-					if (index !== -1) {
-						inComment = false;
-						j += index + model.length - 1;
-					}
-					else break;
-				}
-
-				else if (inTagNoMinify) {
-					// find "</"
-					let model = `</${inTagNoMinify}`;
-					let index = currentLine.substring(j).indexOf(model);
-					if (index !== -1) {
-						inTagNoMinify = "";
-						j += index + model.length - 1;
-					}
-					else break;
-				}
-
-				else if (currentChar == "<") {
-					let tag = currentLine.substring(j + 1, j + 4);
-					if (currentLine.substring(j + 1, j + 4) == "!--") {
-						inComment = true;
-						j += 3;
-						break;
-					}
-					else if (currentLine.substring(j + 1, j + 4) == "pre") {
-						inTagNoMinify = "pre";
-						break;
-					}
-					else if (currentLine.substring(j + 1, j + 6) == "style") {
-						inTagNoMinify = "style";
-						break;
-					}
-					else if (currentLine.substring(j + 1, j + 7) == "script") {
-						inTagNoMinify = "script";
-						break;
-					}
-				}
-			}
-
-			if (trimCondition) lsLine[i] = lsLine[i].trimEnd();
-		}
-
-		return lsLine.join("\n");
-	}
-	else if (lang == "css") {
-		// blocks: 
-		let lsLine = code.trim().split('\n').map(line => line.trim());
-
-		// remove doubble lines
-		for (let i = 0; i < lsLine.length; i++) {
-			if (i < lsLine.length - 1) {
-				let isEmpty = (str) => {
-					let match = str.match(/\s+/g);
-					if (match) return match.length == 1;
-					return false;
-				}
-
-				if (isEmpty(lsLine[i]) && isEmpty(lsLine[i + 1])) {
-					// remove next line
-					console.log("remove line")
-					lsLine.splice(i + 1, 1);
-				}
-			}
-		}
-		
-		return lsLine.join("\n");
-	}
-}
-
 // class
 class CodeEditor {
 	constructor(textarea, type) {
@@ -233,19 +141,22 @@ class CodeEditor {
 		this.bottomToolbar = this.wrap.querySelector(".EVA_CodeEditor_wrap > div:last-child");
 		
 		this.contentEditable.innerText = this.textarea.innerHTML;
-		this.contentEditable.className = "EVA_CodeEditor_contenteditableCode";
+		this.contentEditable.classList.add("EVA_CodeEditor_contenteditableCode");
 
-		// this.textarea.style.display = "none";
+		this.textarea.style.display = "none";
 		this.textarea.insertAdjacentElement("beforebegin", this.wrap);
 
 		this.beautify();
-		this.syntaxHighlighter();
 		this.updateNumRow();
 
 		// set event
 		// action make once after inactivity
 		this.timoutId;
 		this.timout = () => {
+			setTimeout(() => {
+				this.save();
+			}, 100);
+			
 			clearTimeout(this.timoutId);
 			this.timoutId = setTimeout(() => {
 				if (this.inCodeMode()) {
@@ -255,7 +166,6 @@ class CodeEditor {
 				else {
 					this.display();
 				}
-				this.save();
 			}, 1000);
 		}
 		this.contentEditable.addEventListener("input", this.timout);
@@ -385,24 +295,20 @@ class CodeEditor {
 
 				// else
 				let newLine = document.createElement("div");
-				let lineSpan = document.createElement("span");
-				let contentSpan = document.createElement("span");
-				contentSpan.innerText = "";
+				newLine.innerText = "";
 
 				// increase indent level ?
 				if (container.innerText.split("").reverse()[0] == "{") indentLevel++;
 
 				// indent
 				for (let i = 0; i < indentLevel; i++) {
-					contentSpan.innerText += '\t';
+					newLine.innerText += '\t';
 				}
-				contentSpan.innerText += text;
-	
-				lineSpan.appendChild(contentSpan);
-				newLine.appendChild(lineSpan);
+				newLine.innerText += text;
+
 				container.insertAdjacentElement("afterend", newLine);
 
-				setCursorOffset(contentSpan, indentLevel);
+				setCursorOffset(newLine, indentLevel);
 			}
 			else if (evt.key == "Tab") {
 				// tab
@@ -483,7 +389,7 @@ class CodeEditor {
 	save() {
 		if (!this.inCodeMode()) return;
 		
-		this.textarea.value = minify(this.getCode(), this.getCodeLang());
+		this.textarea.value = this.minify(this.getCode());
 	}
 
 	updateNumRow() {
@@ -497,11 +403,7 @@ class CodeEditor {
 		if (!nbRow) {
 			// document.execCommand("formatBlock", false, "div");
 			let newLine = document.createElement("div");
-			let lineSpan = document.createElement("span");
-			let contentSpan = document.createElement("span");
-			contentSpan.innerText = this.contentEditable.innerText;
-			lineSpan.appendChild(contentSpan);
-			newLine.appendChild(lineSpan);
+			newLine.innerText = this.contentEditable.innerText;
 			this.contentEditable.innerHTML = "";
 			this.contentEditable.appendChild(newLine);
 
@@ -546,13 +448,9 @@ class CodeEditor {
 		this.contentEditable.innerHTML = "";
 		lsLine.forEach(line => {
 			let newLine = document.createElement("div");
-			let lineSpan = document.createElement("span");
-			let contentSpan = document.createElement("span");
 
-			contentSpan.innerText = line;
+			newLine.innerText = line;
 
-			lineSpan.appendChild(contentSpan);
-			newLine.appendChild(lineSpan);
 			this.contentEditable.appendChild(newLine);
 		});
 
@@ -563,93 +461,356 @@ class CodeEditor {
 		return (this.conf.codeLanguage || conf.lsClass[this.conf.code].codeLanguage);
 	}
 
+	findBlock(str) {
+		const LANG = this.getCodeLang();
+		const LS_BLOCK = conf.lsCodeLanguage[LANG].lsBlockNoMinify;
+		const LS_KEYWORD = conf.lsCodeLanguage[LANG].syntaxColor.const;
+
+		let firstMatch = {index: Infinity};
+
+		// search keyword
+		LS_KEYWORD.forEach(keyWord => {
+			// generate regexp
+			let regex = new RegExp(`(?<![a-zA-Z0-9])(${keyWord.lsWord.join("|")})(?![a-zA-Z0-9])`);
+			let match = regex.exec(str);
+			if (match) {
+				if (match.index < firstMatch.index) {
+					firstMatch = {type: "simple", block: match[0], index: match.index, color: keyWord.color};
+				}
+			}
+		});
+
+		// search block
+		let currentBlock;
+		let i = 0;
+		while (currentBlock == undefined && i < str.length) {
+			let j = 0;
+			while (j < LS_BLOCK.length) {
+				let block = LS_BLOCK[j];
+				if (str.substring(i, i + block.start.length) == block.start) {
+					// block finded
+					currentBlock = block;
+					if (j < firstMatch.index) {
+						firstMatch = {type: "double", block: block, index: i, color: block.type};
+					}
+					break;
+				}
+
+				j++;
+			}
+
+			i++;
+		}
+		
+		return firstMatch;
+	}
+
+	findEndingBlock(str, block) {
+		let model = block.end;
+		// check line
+		let index = str.indexOf(model);
+		if (index !== -1) {
+			// check escaped
+			if (block.escape !== undefined) {
+				// count number of escape char
+				let counter = 0; ////////////////////////////////////////////////// work only with length ok 1 char for escaped char
+				let k = 1;
+				while (true) {
+					if (str[index - k] == block.escape) {
+						counter++;
+						k++;
+					}
+					else break;
+				}
+				
+				if (counter % 2 == 0) {
+					return index + model.length;
+				}
+				else {
+					return this.findEndingBlock(str.substring(index + model.length), block);
+				}
+			}
+			else {
+				return index + model.length;
+			}
+		}
+		else {
+			// not finded
+			return -1;
+		}
+	}
+
+	minify = (code) => {
+		let lang = this.getCodeLang();
+		let lsBlockNoMinify = conf.lsCodeLanguage[lang].lsBlockNoMinify;
+
+		let lsLine = code.trim().split('\n');
+
+		for (let i = 0; i < lsLine.length; i++) {
+			lsLine[i] = lsLine[i].trimStart();
+	
+			for (let j = 0; j < lsLine[i].length; j++) {
+				// find starting block
+				let currentBlock;
+				for (let k = 0; k < lsBlockNoMinify.length; k++) {
+					let block = lsBlockNoMinify[k];
+					if (lsLine[i].substring(j, j + block.start.length) == block.start) {
+						j += block.start.length;
+						currentBlock = block;
+						break;
+					}
+				}
+				if (currentBlock == undefined) continue;
+
+				// find ending block
+				let model = currentBlock.end;
+				if (model == "\n") break;	// go next line
+
+				while (i < lsLine.length) {
+					// check line
+					let index = lsLine[i].substring(j).indexOf(model);
+					if (index !== -1) {
+						// check escaped
+						if (currentBlock.escape !== undefined) {
+							// count number of escape char
+							let counter = 0; ////////////////////////////////////////////////// work only with length ok 1 char for escaped char
+							let k = 1;
+							while (true) {
+								if (lsLine[i][j + index - k] == currentBlock.escape) {
+									counter++;
+									k++;
+								}
+								else break;
+							}
+							
+							j += index + model.length;
+							if (counter % 2 == 0) {
+								break;
+							}
+						}
+						else {
+							j += index + model.length;
+							break;
+						}
+					}
+					else {
+						// go next line
+						j = 0;
+						i++;
+					}
+				}
+				if (i == lsLine.length) break;
+			}
+			if (i == lsLine.length) break;
+
+			// remove double lines
+			if (lsLine[i].length == 0) {
+				// remove all empty next lines
+				while (true) {
+					if (lsLine[i + 1] == undefined) break;
+					if (lsLine[i + 1].length == 0) {
+						// remove next line
+						lsLine.splice(i + 1, 1);
+					}
+					else break;
+				}
+				if (i == lsLine.length) break;
+			}
+
+			lsLine[i] = lsLine[i].trimEnd();
+		}
+	
+		return lsLine.join("\n");
+	}
+
 	/**
 		beautify : code indented + code colored
 	*/
 	beautify() {
 		if (!this.inCodeMode()) return;
 
-		// indent code
-		let lang = this.getCodeLang();
 		let code = this.textarea.value;
+		let lang = this.getCodeLang();
+		let lsBlockNoMinify = conf.lsCodeLanguage[lang].lsBlockNoMinify;
+		let lsStrToIndent = conf.lsCodeLanguage[lang].lsStrToIndent;
+		// sort lsStrToIndent by str length: long to short
+		lsStrToIndent.sort((a, b) => {
+			return b.str.length - a.str.length;
+		});
 
-		if (lang == "html") {
-			// let process = (str) => {
-			// 	var div = document.createElement('div');
-			// 	div.innerHTML = str.trim();
-			
-			// 	return format(div, 0).innerHTML;
-			// }
-			// let format = (node, level) => {
-			// 	var indentBefore = new Array(level++ + 1).join('\t'),
-			// 	indentAfter = new Array(level - 1).join('\t'),
-			// 	textNode;
-			
-			// 	for (var i = 0; i < node.children.length; i++) {
-			// 		textNode = document.createTextNode('\n' + indentBefore);
-			// 		node.insertBefore(textNode, node.children[i]);
-				
-			// 		format(node.children[i], level);
-				
-			// 		if (node.lastElementChild == node.children[i]) {
-			// 			textNode = document.createTextNode('\n' + indentAfter);
-			// 			node.appendChild(textNode);
-			// 		}
-			// 	}
-			
-			// 	return node;
-			// }
+		let lsLine = code.trim().split('\n');
 
-			// code = process(code);
-
-			code = code.replaceAll('>', '>\n');
-			code = code.replaceAll('<', '\n<');
-			code = code.replaceAll('>\n\n<', '>\n<');
-
-			// remove \n at index 0 and last index if exist
-			if (code[0] == "\n") {
-				code = code.slice(1, code.length);
-			}
-			if (code[code.lenght - 1] == "\n") {
-				code = code.slice(0, code.length - 1);
+		let indentLevel = 0;
+		for (let i = 0; i < lsLine.length; i++) {
+			// set indent level
+			for (let j = 0; j < indentLevel; j++) {
+				lsLine[i] = "\t" + lsLine[i];
 			}
 
-			code = code.split("\n");
+			// update indent level
+			let lineIndentDif = 0;
+			for (let j = 0; j < lsLine[i].length; j++) {
+				// find alter indent block
+				for (let k = 0; k < lsStrToIndent.length; k++) {
+					let block = lsStrToIndent[k];
 
-			let lsBaliseToIndent = conf.lsCodeLanguage.html.lsBlockToIndent;
-
-			lsBaliseToIndent.forEach(el => {
-				let baliseOpen = [];
-				for (let i = 0; i < code.length; i++) {
-					if (code[i].trimStart()[0] == "<" && code[i][code[i].length - 1] == ">") {
-						let balise = code[i].trimStart().slice(1, code[i].trimStart().length - 1);
-						balise = balise.split(" ")[0];
-						
-						if (balise == "/" + el) {
-							// add indent
-							let temp = baliseOpen.splice(baliseOpen.length - 1, 1)[0] + 1;
-							for (let i1 = temp; i1 < i; i1++) {
-								code[i1] = "\t" + code[i1];
-							}
-						}
-						else if (balise == el) {
-							baliseOpen.push(i);
-						}
+					if (lsLine[i].substring(j, j + block.str.length) == block.str) {
+						j += block.str.length - 1;
+						lineIndentDif += (block.action == "indent") ? 1 : -1;
+						break;
 					}
 				}
-			});
 
-			code = code.join("\n");
+				// find starting block
+				let currentBlock;
+				for (let k = 0; k < lsBlockNoMinify.length; k++) {
+					let block = lsBlockNoMinify[k];
+					if (lsLine[i].substring(j, j + block.start.length) == block.start) {
+						j += block.start.length;
+						currentBlock = block;
+						break;
+					}
+				}
+				if (currentBlock == undefined) continue;
+
+				// find ending block
+				let model = currentBlock.end;
+				if (model == "\n") break;	// go next line
+
+				while (i < lsLine.length) {
+					// check line
+					let index = lsLine[i].substring(j).indexOf(model);
+					if (index !== -1) {
+						// check escaped
+						if (currentBlock.escape !== undefined) {
+							// count number of escape char
+							let counter = 0; ////////////////////////////////////////////////// work only with length ok 1 char for escaped char
+							let k = 1;
+							while (true) {
+								if (lsLine[i][j + index - k] == currentBlock.escape) {
+									counter++;
+									k++;
+								}
+								else break;
+							}
+							
+							j += index + model.length;
+							if (counter % 2 == 0) {
+								break;
+							}
+						}
+						else {
+							j += index + model.length;
+							break;
+						}
+					}
+					else {
+						// go next line
+						j = 0;
+						i++;
+					}
+				}
+				if (i == lsLine.length) break;
+			}
+			if (i == lsLine.length) break;
+
+			// max 1 indent dif
+			if (lineIndentDif < -1) lineIndentDif = -1;
+			else if (lineIndentDif > 1) lineIndentDif = 1;
+
+			indentLevel += lineIndentDif;
+			if (lineIndentDif < 0) {
+				for (let j = 0; j < Math.abs(lineIndentDif); j++) {
+					// remove indent
+					lsLine[i] = lsLine[i].substring(1);
+				}
+			}
 		}
 
-		this.setCode(code);
+		this.setCode(lsLine.join("\n"));
 
+		this.save();
 		this.syntaxHighlighter();
 	}
 
 	syntaxHighlighter() {
 		if (!this.inCodeMode()) return;
 
+		let selObj = window.getSelection();
+		let range;
+		let divCursor;
+		if (selObj.rangeCount > 0) {
+			range = selObj.getRangeAt(0);
+			if (!range.collapsed) return;
+			divCursor = this.getTopDiv(range.startContainer);
+		}
+
+		let code = this.getCode();
+		let lsLine = code.split('\n');
+
+		let currentDoubleBlock;
+		for (let i = 0; i < lsLine.length; i++) {
+			const lineText = lsLine[i];
+			let newLine = document.createElement("div");
+
+			const addSpan = (text, color) => {
+				if (text.length == 0) return;
+	
+				let span = document.createElement("span");
+				if (color) {span.style.color = color;console.log(text, color)}
+				span.innerText = text;
+				newLine.appendChild(span);
+			}
+			
+			let j = 0;
+			if (currentDoubleBlock) {
+				let blockEndIndex = this.findEndingBlock(lineText.substring(j), currentDoubleBlock.block);
+				if (blockEndIndex == -1) {
+					// not finded
+					addSpan(lineText, conf.lsColor[currentDoubleBlock.color]);
+					continue;
+				}
+				addSpan(lineText.substring(j, j + blockEndIndex), conf.lsColor[currentDoubleBlock.color]);
+				currentDoubleBlock = undefined;
+				j += blockEndIndex;
+			}
+			while (j < lineText.length) {
+				// find next block / keyword
+				let block = this.findBlock(lineText.substring(j));
+
+				addSpan(lineText.substring(j, j + block.index));
+				if (block.index == Infinity) break;
+
+				j += block.index;
+				if (block.type == "simple") {
+					addSpan(lineText.substring(j, j + block.block.length), conf.lsColor[block.color]);
+					j += block.block.length;
+				}
+				else if (block.type == "double") {
+					if (block.block.end == "\n") {
+						addSpan(lineText.substring(j), conf.lsColor[block.color]);
+						break;
+					}
+
+					addSpan(lineText.substring(j, j + block.block.start.length), conf.lsColor[block.color]);
+					j += block.block.start.length;
+					let blockEndIndex = this.findEndingBlock(lineText.substring(j), block.block);
+					if (blockEndIndex == -1) {
+						blockEndIndex = Infinity;
+						currentDoubleBlock = block;
+					}
+					addSpan(lineText.substring(j, j + blockEndIndex), conf.lsColor[block.color]);
+					j += blockEndIndex;
+				}
+			}
+
+			// replace line
+			let lsDiv = this.contentEditable.getElementsByTagName("div");
+			if (lsDiv[i] !== divCursor) {
+				// update line
+				this.contentEditable.replaceChild(newLine, lsDiv[i]);
+			}
+		}
 	}
 }
 
@@ -657,7 +818,8 @@ class Wysiwyg extends CodeEditor {
 	constructor(textarea, type) {
 		super(textarea, type);
 
-		this.contentEditable.className = "EVA_CodeEditor_contenteditableHtml";
+		this.contentEditable.classList.remove("EVA_CodeEditor_contenteditableCode");
+		this.contentEditable.classList.add("EVA_CodeEditor_contenteditableHtml");
 
 		this.toolbar = document.createElement("div");
 		this.toolbar.className = "EVA_CodeEditor_toolbar";
@@ -819,7 +981,112 @@ class Wysiwyg extends CodeEditor {
 	*/
 	save() {
 		if (this.inCodeMode()) super.save();
-		else this.textarea.value = this.contentEditable.innerHTML;
+		else this.textarea.value = this.minify(this.contentEditable.innerHTML);
+	}
+
+	parser() {
+		let code = this.textarea.value;
+		let lang = this.getCodeLang();
+		let lsBlockNoMinify = conf.lsCodeLanguage[lang].lsBlockNoMinify;
+		let lsBlockToParse = conf.lsCodeLanguage[lang].lsBlockToParse;
+
+		let lsLine = code.trim().split('\n');
+
+		for (let i = 0; i < lsLine.length; i++) {
+			for (let j = 0; j < lsLine[i].length; j++) {
+				// split row if good block
+				for (let k = 0; k < lsBlockToParse.length; k++) {
+					let block = lsBlockToParse[k];
+					let lsModel = [
+						`<${block}`,
+						`</${block}`,
+					];
+
+					let isBreaked = false;
+					for (let l = 0; l < lsModel.length; l++) {
+						let model = lsModel[l];
+						if (lsLine[i].substring(j, j + model.length) == model) {
+							// add "\n" after ">"
+							let index = lsLine[i].substring(j).indexOf(">");
+
+							let before = lsLine[i].substring(0, j);
+							let center = lsLine[i].substring(j, j + index + 1);
+							let after = lsLine[i].substring(j + index + 1);
+							let nbCharAdded = 0;
+							if (before.length !== 0) {
+								before += "\n";
+								nbCharAdded++;
+							}
+							if (after.length !== 0) {
+								center += "\n";
+								nbCharAdded++;
+							}
+							lsLine[i] = before + center + after;
+
+							j += index + 1 + nbCharAdded;
+							isBreaked = true;
+							break;
+						}
+						if (isBreaked) break;
+					}
+					if (isBreaked) break;
+				}
+
+				// find starting block
+				let currentBlock;
+				for (let k = 0; k < lsBlockNoMinify.length; k++) {
+					let block = lsBlockNoMinify[k];
+					if (lsLine[i].substring(j, j + block.start.length) == block.start) {
+						j += block.start.length;
+						currentBlock = block;
+						break;
+					}
+				}
+				if (currentBlock == undefined) continue;
+
+				// find ending block
+				let model = currentBlock.end;
+				if (model == "\n") break;	// go next line
+
+				while (i < lsLine.length) {
+					// check line
+					let index = lsLine[i].substring(j).indexOf(model);
+					if (index !== -1) {
+						// check escaped
+						if (currentBlock.escape !== undefined) {
+							// count number of escape char
+							let counter = 0; ////////////////////////////////////////////////// work only with length ok 1 char for escaped char
+							let k = 1;
+							while (true) {
+								if (lsLine[i][j + index - k] == currentBlock.escape) {
+									counter++;
+									k++;
+								}
+								else break;
+							}
+							
+							j += index + model.length;
+							if (counter % 2 == 0) {
+								break;
+							}
+						}
+						else {
+							j += index + model.length;
+							break;
+						}
+					}
+					else {
+						// go next line
+						j = 0;
+						i++;
+					}
+				}
+				if (i == lsLine.length) break;
+			}
+			if (i == lsLine.length) break;
+		}
+	
+		this.textarea.value = lsLine.join("\n");
 	}
 
 	/**
@@ -844,7 +1111,14 @@ class Wysiwyg extends CodeEditor {
         this.bottomToolbar.style.display = display;
 
 		// content editable style
-		this.contentEditable.className = this.inCodeMode() ? "EVA_CodeEditor_contenteditableCode" : "EVA_CodeEditor_contenteditableHtml";
+		if (this.inCodeMode()) {
+			this.contentEditable.classList.remove("EVA_CodeEditor_contenteditableHtml");
+			this.contentEditable.classList.add("EVA_CodeEditor_contenteditableCode");
+		}
+		else {
+			this.contentEditable.classList.remove("EVA_CodeEditor_contenteditableCode");
+			this.contentEditable.classList.add("EVA_CodeEditor_contenteditableHtml");
+		}
 
 		if (this.inCodeMode()) {
 			this.contentEditable.innerText = this.textarea.value;
@@ -855,8 +1129,13 @@ class Wysiwyg extends CodeEditor {
 			this.contentEditable.innerHTML = this.textarea.value;
 		}
 
-		// this.contentEditable.focus();
+		this.contentEditable.focus();
 		this.rezise();
+	}
+	
+	beautify() {
+		this.parser();
+		super.beautify();
 	}
 
 	/**
