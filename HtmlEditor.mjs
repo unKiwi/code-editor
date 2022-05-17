@@ -369,15 +369,15 @@ class CodeEditor {
 
 	getTopDiv(element) {
 		if (!this.inCodeMode()) return;
-
+		
 		while (element !== this.contentEditable) {
 			if (element.nodeName == "DIV" && element.parentElement == this.contentEditable) {
 				return element;
 			}
 			else {
 				element = element.parentElement;
-	
-				if (element.nodeName == 'BODY') {
+				
+				if (element.nodeName == 'HTML') {
 					return;
 				}
 			}
@@ -757,7 +757,7 @@ class CodeEditor {
 				if (text.length == 0) return;
 	
 				let span = document.createElement("span");
-				if (color) {span.style.color = color;console.log(text, color)}
+				if (color) span.style.color = color
 				span.innerText = text;
 				newLine.appendChild(span);
 			}
