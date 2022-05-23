@@ -104,7 +104,7 @@
 [contenteditable] {
 	padding: 2px;
 
-	resize: both;
+	resize: horizontal;
     outline: 0px solid transparent;
 }
 .EVA_CodeEditor_contenteditableCode {
@@ -123,6 +123,9 @@
 	word-wrap: break-word;
 }
 .EVA_CodeEditor_contenteditableHtml a {
+	cursor: pointer;
+}
+.EVA_CodeEditor_contenteditableHtml img {
 	cursor: pointer;
 }
 /* same property */
@@ -225,7 +228,7 @@
 }
 
 /* link */
-#EVA_CodeEditor_popupLinkInfo {
+#EVA_CodeEditor_popupImgLinkInfo {
 	display: flex;
 	position: absolute;
 	background: var(--EVA-CodeEditor-bg-primary);
@@ -233,31 +236,54 @@
 	border: 1px solid var(--EVA-CodeEditor-border-primary);
 	border-radius: 3px;
 }
-#EVA_CodeEditor_popupLinkInfo a {
+#EVA_CodeEditor_popupImgLinkInfo a {
 	margin-right: 20px;
 }
-#EVA_CodeEditor_popupLinkInfo button {
+#EVA_CodeEditor_popupImgLinkInfo button {
 	border: 0;
 	border-radius: 3px;
 	background: var(--EVA-CodeEditor-bg-primary);
 	margin-left: 3px;
 	cursor: pointer;
 }
-#EVA_CodeEditor_popupLinkInfo button:hover {
+#EVA_CodeEditor_popupImgLinkInfo button:hover {
 	background: var(--EVA-CodeEditor-bg-secondary);
 }
-#EVA_CodeEditor_popupLinkInfo .EVA_CodeEditor_popupLinkInfo_edit input {
+#EVA_CodeEditor_popupImgLinkInfo .EVA_CodeEditor_popupImgLinkInfo_edit input {
 	margin-right: 5px;
 }
 
 /* image */
-.EVA_CodeEditor_ce img {
-	cursor: move;
-}
 #EVA_CodeEditor_resizeableDiv {
 	position: absolute;
-	resize: both;
-	overflow: auto;
+	border: 1px solid var(--EVA-CodeEditor-bg-selected-secondary);;
+}
+#EVA_CodeEditor_resizeableDiv > div {
+	height: 5px;
+	width: 5px;
+	background: var(--EVA-CodeEditor-bg-selected-secondary);;
+	border: 1px solid white;
+}
+#EVA_CodeEditor_resizeableDiv > div:nth-child(1) {
+	position: relative;
+	top: calc(50% - 4px);
+	left: calc(100% - 7px);
+
+	cursor: w-resize;
+}
+#EVA_CodeEditor_resizeableDiv > div:nth-child(2) {
+	position: relative;
+	top: calc(100% - 14px);
+	left: calc(50% - 4px);
+
+	cursor: n-resize;
+}
+#EVA_CodeEditor_resizeableDiv > div:nth-child(3) {
+	position: relative;
+	top: calc(100% - 21px);
+	left: calc(100% - 7px);
+
+	cursor: nw-resize;
 }
 
 /* mask */

@@ -12,7 +12,7 @@
 *********************************************************************/
 
 // include
-import conf from './HtmlEditorConfig.mjs';
+import conf from './HtmlEditorConfig.js';
 
 // global variable
 let mouseIsDown = false;
@@ -135,7 +135,7 @@ class CodeEditor {
 		this.lineNumber = this.wrap.querySelector(".EVA_CodeEditor_editor > div:first-child");
 
 		this.contentEditable = this.wrap.querySelector("[contentEditable]");
-		this.contentEditable.style.height = this.textarea.offsetHeight + "px";
+		// this.contentEditable.style.height = this.textarea.offsetHeight + "px";
 		this.contentEditable.style.width = this.textarea.offsetWidth + "px";
 
 		this.bottomToolbar = this.wrap.querySelector(".EVA_CodeEditor_wrap > div:last-child");
@@ -148,6 +148,7 @@ class CodeEditor {
 
 		this.beautify();
 		this.updateNumRow();
+		this.setLimitHeight();
 
 		// set event
 		// action make once after inactivity
@@ -155,12 +156,12 @@ class CodeEditor {
 		this.timout = () => {
 			setTimeout(() => {
 				this.save();
+				if (this.inCodeMode()) this.updateNumRow();
 			}, 100);
 			
 			clearTimeout(this.timoutId);
 			this.timoutId = setTimeout(() => {
 				if (this.inCodeMode()) {
-					this.updateNumRow();
 					this.syntaxHighlighter();
 				}
 				else {
@@ -174,6 +175,18 @@ class CodeEditor {
 			document.execCommand("defaultParagraphSeparator", false, this.inCodeMode() ? "div" : "p");
 		});
 
+		this.contentEditable.addEventListener("dblclick", () => {
+			if (!this.inCodeMode()) return;
+
+			let selObj = window.getSelection();
+			if (selObj.rangeCount > 0) {
+				let range = selObj.getRangeAt(0);
+				let textSelected = range.endContainer.textContent.substring(0, range.endOffset);
+				let match = /\s+$/.exec(textSelected);
+				range.setEnd(range.endContainer, range.endOffset - (match ? match[0].length : 0));
+			}
+		});
+
 		// rezise content editable
 		this.contentEditable.addEventListener("mousedown", () => {
 			mouseIsDown = true;
@@ -185,6 +198,10 @@ class CodeEditor {
 		window.addEventListener("mouseup", () => {
 			this.rezise();
 			mouseIsDown = false;
+		});
+
+		window.addEventListener("resize", () => {
+			this.setLimitHeight();
 		});
 
 		// pretty print btn
@@ -250,6 +267,15 @@ class CodeEditor {
 		});
 		this.contentEditable.addEventListener("keydown", evt => {
 			this.timout();
+
+			let isMac = navigator.platform.match("Mac");
+
+			if ((isMac ? evt.metaKey : evt.ctrlKey)/* && conf.language == "fr"*/) {
+				if (evt.key == "s") {
+					if (!this.inCodeMode()) this.edit("underline");
+					evt.preventDefault();
+				}
+			}
 
 			if (!this.inCodeMode()) return;
 
@@ -354,6 +380,14 @@ class CodeEditor {
 		});
 	}
 
+	// set content editable max height to 80% of window screen
+	setLimitHeight() {
+		this.contentEditable.style.minHeight = window.innerHeight * 0.2 + 'px';
+		this.lineNumber.style.minHeight = this.contentEditable.style.minHeight;
+		this.contentEditable.style.maxHeight = window.innerHeight * 0.8 + 'px';
+		this.lineNumber.style.maxHeight = this.contentEditable.style.maxHeight;
+	}
+
 	inCodeMode() {
 		return (!(this instanceof Wysiwyg) || this.codeIsShow);
 	}
@@ -362,9 +396,9 @@ class CodeEditor {
 		// width
 		this.wrap.style.width = this.contentEditable.style.width.split("px")[0] * 1 + this.lineNumber.offsetWidth + 4 + "px";
 		// height
-		this.wrap.style.height = (this instanceof Wysiwyg ? this.toolbar.offsetHeight : 0) + this.contentEditable.style.height.split("px")[0] * 1 + this.bottomToolbar.offsetHeight + 4 + "px";
+		// this.wrap.style.height = (this instanceof Wysiwyg ? this.toolbar.offsetHeight : 0) + this.contentEditable.style.height.split("px")[0] * 1 + this.bottomToolbar.offsetHeight + 4 + "px";
 
-		this.lineNumber.style.height = this.contentEditable.style.height;
+		// this.lineNumber.style.height = this.contentEditable.style.height;
 	}
 
 	getTopDiv(element) {
@@ -490,7 +524,7 @@ class CodeEditor {
 				if (str.substring(i, i + block.start.length) == block.start) {
 					// block finded
 					currentBlock = block;
-					if (j < firstMatch.index) {
+					if (i < firstMatch.index) {
 						firstMatch = {type: "double", block: block, index: i, color: block.type};
 					}
 					break;
@@ -694,13 +728,13 @@ class CodeEditor {
 								else break;
 							}
 							
-							j += index + model.length;
+							j += index;
 							if (counter % 2 == 0) {
 								break;
 							}
 						}
 						else {
-							j += index + model.length;
+							j += index;
 							break;
 						}
 					}
@@ -729,7 +763,7 @@ class CodeEditor {
 
 		this.setCode(lsLine.join("\n"));
 
-		this.save();
+		// this.save(); ////////////////////////////////////////////////////////////////////////////////////////// jolie mais pas modifier le textarea
 		this.syntaxHighlighter();
 	}
 
@@ -761,6 +795,20 @@ class CodeEditor {
 				span.innerText = text;
 				newLine.appendChild(span);
 			}
+			const replaceLine = () => {
+				let lsDiv = this.contentEditable.getElementsByTagName("div");
+				let cursorOffset;
+				if (lsDiv[i] == divCursor) {
+					cursorOffset = getCursorOffset(lsDiv[i]);
+				}
+
+				// update line
+				this.contentEditable.replaceChild(newLine, lsDiv[i]);
+
+				if (cursorOffset) {
+					setCursorOffset(newLine, cursorOffset);
+				}
+			}
 			
 			let j = 0;
 			if (currentDoubleBlock) {
@@ -768,6 +816,7 @@ class CodeEditor {
 				if (blockEndIndex == -1) {
 					// not finded
 					addSpan(lineText, conf.lsColor[currentDoubleBlock.color]);
+					replaceLine();
 					continue;
 				}
 				addSpan(lineText.substring(j, j + blockEndIndex), conf.lsColor[currentDoubleBlock.color]);
@@ -804,12 +853,7 @@ class CodeEditor {
 				}
 			}
 
-			// replace line
-			let lsDiv = this.contentEditable.getElementsByTagName("div");
-			if (lsDiv[i] !== divCursor) {
-				// update line
-				this.contentEditable.replaceChild(newLine, lsDiv[i]);
-			}
+			replaceLine();
 		}
 	}
 }
@@ -934,11 +978,7 @@ class Wysiwyg extends CodeEditor {
 			let isMac = navigator.platform.match("Mac");
 
 			if ((isMac ? evt.metaKey : evt.ctrlKey)/* && conf.language == "fr"*/) {
-				if (evt.key == "s") {
-					this.edit("underline");
-					evt.preventDefault();
-				}
-				else if (evt.key == "g") {
+				if (evt.key == "g") {
 					this.edit("bold");
 					evt.preventDefault();
 				}
@@ -966,11 +1006,12 @@ class Wysiwyg extends CodeEditor {
 			// link or img
 			elmClicked = evt.target;
 			if (elmClicked.nodeName == "A") {
-				popupLinkInfo.show();
+				popupImgLinkInfo.show();
 				confCommand.myThis = this;
 			}
 			else if (elmClicked.nodeName == "IMG") {
 				resizeableDiv.show();
+				// popupImgLinkInfo.show();
 				confCommand.myThis = this;
 			}
 		});
@@ -1343,7 +1384,7 @@ window.addEventListener("load", () => {
 	initMask();
 	popupImgLink.init();
 	popupColorBtn.init();
-	popupLinkInfo.init();
+	popupImgLinkInfo.init();
 	resizeableDiv.init();
 });
 
@@ -1370,7 +1411,7 @@ let hidePopup = () => {
 		document.getElementById(id).style.display = "none";
 	});
 	
-	popupLinkInfo.hide();
+	popupImgLinkInfo.hide();
 }
 
 let popupImgLink = {}
@@ -1518,7 +1559,7 @@ popupImgLink.init = () => {
 	}
 
 	popup.addEventListener("keyup", (e) => {
-		if (e.key == "Enter") {
+		if (e.key == "Enter" && popup.getElementsByTagName("textarea")[0] !== document.activeElement) {
 			validate();
 			e.preventDefault();
 		}
@@ -1651,17 +1692,17 @@ popupColorBtn.show = () => {
 	popup.focus();
 }
 
-let popupLinkInfo = {}
-popupLinkInfo.init = () => {
+let popupImgLinkInfo = {}
+popupImgLinkInfo.init = () => {
 	// get popup
 	let template = document.querySelector("#EVA_CodeEditor_template");
-	let popup = document.importNode(template.content, true).querySelector("#EVA_CodeEditor_popupLinkInfo");
+	let popup = document.importNode(template.content, true).querySelector("#EVA_CodeEditor_popupImgLinkInfo");
 	popup.style.display = "none";
 
 	// esc and enter
 	const validate = () => {
 		// update link
-		let inputList = popup.querySelectorAll("input");
+		let inputList = popup.querySelectorAll("input, textarea");
 		if (inputList[0].value == "") {
 			inputList[0].focus();
 		}
@@ -1680,7 +1721,7 @@ popupLinkInfo.init = () => {
 		}
 	}
 	popup.addEventListener("keyup", (e) => {
-		if (e.key == "Enter") {
+		if (e.key == "Enter" && popup.getElementsByTagName("textarea")[0] !== document.activeElement) {
 			validate();
 			e.preventDefault();
 		}
@@ -1730,11 +1771,11 @@ popupLinkInfo.init = () => {
 	// edit
 	btnList[1].addEventListener("click", () => {
 		// hide 3 btns
-		popup.querySelectorAll(".EVA_CodeEditor_popupLinkInfo_opt button").forEach(elm => {
+		popup.querySelectorAll(".EVA_CodeEditor_popupImgLinkInfo_opt button").forEach(elm => {
 			elm.style.display = "none";
 		});
 
-		let div = popup.querySelector(".EVA_CodeEditor_popupLinkInfo_edit");
+		let div = popup.querySelector(".EVA_CodeEditor_popupImgLinkInfo_edit");
 
 		// fill input
 		// set language
@@ -1744,13 +1785,13 @@ popupLinkInfo.init = () => {
 		if (content == undefined) {
 			content = linkLanguage.link.content;
 		}
-		div.querySelectorAll("input")[0].placeholder = content;
+		div.querySelector("input").placeholder = content;
 		// title
 		content = linkLanguage.title.contentLanguage[conf.language];
 		if (content == undefined) {
 			content = linkLanguage.title.content;
 		}
-		div.querySelectorAll("input")[1].placeholder = content;
+		div.querySelector("textarea").placeholder = content;
 		// validate
 		content = linkLanguage.validate.contentLanguage[conf.language];
 		if (content == undefined) {
@@ -1758,8 +1799,8 @@ popupLinkInfo.init = () => {
 		}
 		div.querySelector("button").textContent = content;
 
-		div.querySelectorAll("input")[0].value = elmClicked.href;
-		div.querySelectorAll("input")[1].value = elmClicked.title;
+		div.querySelector("input").value = elmClicked.href;
+		div.querySelector("textarea").value = elmClicked.title;
 
 		// event
 		div.querySelector("button").addEventListener("click", () => {
@@ -1767,10 +1808,10 @@ popupLinkInfo.init = () => {
 		})
 
 		// hide or show some parts
-		popup.querySelector(".EVA_CodeEditor_popupLinkInfo_opt").style.display = "none";
-		popup.querySelector(".EVA_CodeEditor_popupLinkInfo_edit").style.display = "flex";
+		popup.querySelector(".EVA_CodeEditor_popupImgLinkInfo_opt").style.display = "none";
+		popup.querySelector(".EVA_CodeEditor_popupImgLinkInfo_edit").style.display = "flex";
 
-		div.querySelectorAll("input")[0].select();
+		div.querySelector("input").select();
 	});
 	// unlink
 	btnList[2].addEventListener("click", () => {
@@ -1787,8 +1828,8 @@ popupLinkInfo.init = () => {
 	// add popup into document
 	document.body.appendChild(popup);
 }
-popupLinkInfo.show = () => {
-	let popup = document.querySelector("#EVA_CodeEditor_popupLinkInfo");
+popupImgLinkInfo.show = () => {
+	let popup = document.querySelector("#EVA_CodeEditor_popupImgLinkInfo");
 	let selObj = window.getSelection();
 	selRange = selObj.getRangeAt(0);
 
@@ -1797,8 +1838,8 @@ popupLinkInfo.show = () => {
 	popup.querySelector("a").textContent = elmClicked.href;
 
 	// hide or show some parts
-	popup.querySelector(".EVA_CodeEditor_popupLinkInfo_opt").style.display = "flex";
-	popup.querySelector(".EVA_CodeEditor_popupLinkInfo_edit").style.display = "none";
+	popup.querySelector(".EVA_CodeEditor_popupImgLinkInfo_opt").style.display = "flex";
+	popup.querySelector(".EVA_CodeEditor_popupImgLinkInfo_edit").style.display = "none";
 
 	// place popup
 	let pos = elmClicked.getBoundingClientRect();
@@ -1812,8 +1853,8 @@ popupLinkInfo.show = () => {
 	// set focus
 	popup.focus();
 }
-popupLinkInfo.hide = () => {
-	let popup = document.querySelector("#EVA_CodeEditor_popupLinkInfo");
+popupImgLinkInfo.hide = () => {
+	let popup = document.querySelector("#EVA_CodeEditor_popupImgLinkInfo");
 	// show 3 btns
 	popup.querySelectorAll("button").forEach(elm => {
 		elm.style.display = "block";
@@ -1830,26 +1871,68 @@ popupLinkInfo.hide = () => {
 let resizeableDiv = {}
 resizeableDiv.init = () => {
 	// create resizeable div
-	let div = document.createElement("div");
-	div.id = "EVA_CodeEditor_resizeableDiv";
+	let template = document.getElementById("EVA_CodeEditor_template");
+	let div =  document.importNode(template.content, true).getElementById("EVA_CodeEditor_resizeableDiv");
 
 	// set event
-	let mouseIsup = true;
-	div.addEventListener("mousedown", () => {
-		mouseIsup = false;
-	});
-	div.addEventListener("mousemove", (evt) => {
-		if (mouseIsup == false) {
-			// resize image like resizeable div
-			elmClicked.style.height = div.style.height;
-			elmClicked.style.width = div.style.width;
+	let currentHand;
+	let lsHand = div.getElementsByTagName("div");
+	for (let i = 0; i < lsHand.length; i++) {
+		let hand = lsHand[i];
+		let aspectRation;
+		hand.addEventListener("mousedown", () => {
+			currentHand = hand;
+			aspectRation = div.style.width.split("px")[0] * 1 / div.style.height.split("px")[0] * 1;
+		});
+		window.addEventListener("mousemove", (evt) => {
+			if (currentHand == hand) {
+				// resize div resizeable
+				let scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+				let scrollLeft = document.body.scrollLeft || document.documentElement.scrollLeft;
+				if (i == 0) {
+					// horizontaly hand
+					div.style.width = evt.clientX - div.offsetLeft + scrollLeft + "px";
+				}
+				else if (i == 1) {
+					// verticaly hand
+					div.style.height = evt.clientY - div.offsetTop + scrollTop + "px";
+				}
+				else {
+					// proportionaly hand
+					let divResizeablePos = div.getBoundingClientRect();
+					let x = evt.clientX - divResizeablePos.left;
+					let y = evt.clientY - divResizeablePos.top;
 
-			confCommand.myThis.save();
-		}
-	});
-	div.addEventListener("mouseup", () => {
-		mouseIsup = true;
-	});
+					let newWidth;
+					let newHeight;
+					if (div.style.height.split("px")[0] * 1 - y > div.style.width.split("px")[0] * 1 - x) {
+						newWidth = x;
+						newHeight = newWidth / aspectRation;
+					}
+					else {
+						newHeight = y;
+						newWidth = newHeight * aspectRation;
+					}
+
+					div.style.width = newWidth + "px";
+					div.style.height = newHeight + "px";
+				}
+			}
+		});
+		window.addEventListener("mouseup", () => {
+			if (currentHand) {
+				// resize image like resizeable div
+				elmClicked.style.height = div.style.height;
+				elmClicked.style.width = div.style.width;
+		
+				confCommand.myThis.save();
+				resizeableDiv.show();
+				// popupImgLinkInfo.show();
+
+				currentHand = undefined;
+			}
+		});
+	}
 
 	// add popup into document
 	document.body.appendChild(div);
@@ -1859,10 +1942,11 @@ resizeableDiv.show = () => {
 
 	// cover image with resizeableDiv
 	let pos = elmClicked.getBoundingClientRect();
-	div.style.top = pos.y + window.scrollY + "px";
-	div.style.left = pos.x + window.scrollY + "px";
-	div.style.height = pos.bottom - pos.y + "px";
-	div.style.width = pos.right - pos.x + "px";
+	
+	div.style.top = pos.y + window.scrollY - 1 + "px";
+	div.style.left = pos.x + window.scrollX - 1 + "px";
+	div.style.height = pos.height + "px";
+	div.style.width = pos.width + "px";
 
 	// show resizeableDiv
 	document.querySelector("#EVA_CodeEditor_popupMask").style.display = "block";

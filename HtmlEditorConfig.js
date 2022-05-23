@@ -43,9 +43,20 @@ const conf = {
 				{str: "</div", action: "outdent"},
 				{str: "<button", action: "indent"},
 				{str: "</button", action: "outdent"},
+				{str: "<table", action: "indent"},
+				{str: "</table", action: "outdent"},
+				{str: "<thead", action: "indent"},
+				{str: "</thead", action: "outdent"},
+				{str: "<tbody", action: "indent"},
+				{str: "</tbody", action: "outdent"},
+				{str: "<th", action: "indent"},
+				{str: "</th", action: "outdent"},
+				{str: "<tr", action: "indent"},
+				{str: "</tr", action: "outdent"},
 			],
 			lsBlockNoMinify: [
 				{start: '<!--', end: '-->', type: "comment"},
+				{start: '{{', end: '}}', type: "expSQL"},
 				{start: '<pre', end: '</pre>'},
 				{start: '<style', end: '</style>'},
 				{start: '<script', end: '</script>'},
@@ -61,6 +72,7 @@ const conf = {
 			],
 			lsBlockNoMinify: [
 				{start: '/*', end: '*/', type: "comment"},
+				{start: '{{', end: '}}', type: "expSQL"},
 			],
 			syntaxColor: {
 				const: [],
@@ -83,6 +95,7 @@ const conf = {
 				{start: '\'', end: '\'', escape: "\\", type: "string"},
 				{start: '"', end: '"', escape: "\\", type: "string"},
 				{start: '`', end: '`', escape: "\\", type: "string"},
+				{start: '{{', end: '}}', type: "expSQL"},
 			],
 			syntaxColor: {
 				const: [
@@ -91,7 +104,7 @@ const conf = {
 						color: "keyWordPrimary",
 					},
 					{
-						lsWord: ["if", "else", "return", "break", "for", "while"],
+						lsWord: ["if", "else", "return", "break", "for", "while", "try", "catch"],
 						color: "keyWordSecondary",
 					},
 				],
@@ -101,15 +114,26 @@ const conf = {
 			lsStrToIndent: [
 				{str: "(", action: "indent"},
 				{str: ")", action: "outdent"},
+				// {str: "SELECT", action: "indent"},
+				// {str: "CREATE", action: "indent"},
+				// {str: "INSERT", action: "indent"},
+				// {str: "UPDATE", action: "indent"},
+				// {str: "DELETE", action: "indent"},
+				// {str: ";", action: "outdent"},
 			],
 			lsBlockNoMinify: [
 				{start: '--', end: '\n', type: "comment"},
 				{start: '#', end: '\n', type: "comment"},
+				{start: '[', end: ']', type: "expSQL"},
 			],
 			syntaxColor: {
 				const: [
 					{
-						lsWord: ["SELECT", "FROM", "JOIN", "WHERE"],
+						lsWord: ["SELECT", "CREATE", "DROP", "DELETE", "UPDATE", "ALTER", "RENAME", "TRUNCATE", "INSERT", "LOAD"],
+						color: "keyWordSecondary",
+					},
+					{
+						lsWord: ["ADD","ALL","AND","ANY","APPLY","AS","ASC","AUTHORIZATION","BACKUP","BEGIN","BETWEEN","BREAK","BROWSE","BULK","BY","CASCADE","CASE","CHECK","CHECKPOINT","CLOSE","CLUSTERED","COALESCE","COLLATE","COLUMN","COMMIT","COMPUTE","CONNECT","CONSTRAINT","CONTAINS","CONTAINSTABLE","CONTINUE","CONVERT","CROSS","CURRENT","CURRENT_DATE","CURRENT_TIME","CURRENT_TIMESTAMP","CURRENT_USER","CURSOR","DATABASE","DBCC","DEALLOCATE","DECLARE","DEFAULT","DENY","DESC","DISK","DISTINCT","DISTRIBUTED","DOUBLE","DUMMY","DUMP","ELSE","END","ERRLVL","ESCAPE","EXCEPT","EXEC","EXECUTE","EXISTS","EXIT","FETCH","FILE","FILLFACTOR","FOLLOWING","FOR","FOREIGN","FREETEXT","FREETEXTTABLE","FROM","FULL","FUNCTION","GOTO","GRANT","GROUP","HAVING","HOLDLOCK","IDENTITY","IDENTITYCOL","IDENTITY_INSERT","IF","IN","INDEX","INNER","INTERSECT","INTO","IS","JOIN","KEY","KILL","LEFT","LIKE","LINENO","MATCH","MATCHED","MERGE","NATURAL","NATIONAL","NOCHECK","NONCLUSTERED","NOCYCLE","NOT","NULL","NULLIF","OF","OFF","OFFSETS","ON","OPEN","OPENDATASOURCE","OPENQUERY","OPENROWSET","OPENXML","OPTION","OR","ORDER","OUTER","OVER","PARTITION","PERCENT","PIVOT","PLAN","PRECEDING","PRECISION","PRIMARY","PRINT","PROC","PROCEDURE","PUBLIC","RAISERROR","READ","READTEXT","RECONFIGURE","REFERENCES","REPLICATION","RESTORE","RESTRICT","RETURN","REVOKE","RIGHT","ROLLBACK","ROWCOUNT","ROWGUIDCOL","ROWS?","RULE","SAVE","SCHEMA","SESSION_USER","SET","SETUSER","SHUTDOWN","SOME","START","STATISTICS","SYSTEM_USER","TABLE","TEXTSIZE","THEN","TO","TOP","TRAN","TRANSACTION","TRIGGER","TSEQUAL","UNBOUNDED","UNION","UNIQUE","UNPIVOT","UPDATETEXT","USE","USER","USING","VALUES","VARYING","VIEW","WAITFOR","WHEN","WHERE","WHILE","WITH","WITHIN","WRITETEXT","XML"],
 						color: "keyWordPrimary",
 					},
 				],

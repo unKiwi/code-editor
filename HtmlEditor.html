@@ -3,7 +3,7 @@
 
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="module" src="HtmlEditor.mjs"></script>
+	<script type="module" src="HtmlEditor.js"></script>
 	<script src="https://kit.fontawesome.com/3ae285e3b5.js" crossorigin="anonymous"></script>
 	<link href="HtmlEditor.css" rel="stylesheet">
 </head>
@@ -33,7 +33,7 @@
 				<input id="EVA_CodeEditor_checkboxAAB" type="checkbox">
 				<label for="EVA_CodeEditor_checkboxAAB"></label>
 			</div>
-			<input class="EVA_CodeEditor_title" type="text">
+			<textarea class="EVA_CodeEditor_title"></textarea>
 			<div class="EVA_CodeEditor_btnGroup">
 				<button class="EVA_CodeEditor_validate"></button>
 			</div>
@@ -48,18 +48,24 @@
 			<button class="EVA_CodeEditor_transparent"></button>
 		</div>
 
-		<div id="EVA_CodeEditor_popupLinkInfo">
-			<div class="EVA_CodeEditor_popupLinkInfo_opt">
+		<div id="EVA_CodeEditor_popupImgLinkInfo">
+			<div class="EVA_CodeEditor_popupImgLinkInfo_opt">
 				<a target="_blank"></a>
 				<button><i class="far fa-copy"></i></button>
 				<button><i class="fas fa-edit"></i></button>
 				<button><i class="fas fa-unlink"></i></button>
 			</div>
-			<div class="EVA_CodeEditor_popupLinkInfo_edit">
+			<div class="EVA_CodeEditor_popupImgLinkInfo_edit">
 				<input type="text">
-				<input type="text">
+				<textarea></textarea>
 				<button></button>
 			</div>
+		</div>
+
+		<div id="EVA_CodeEditor_resizeableDiv">
+			<div></div>
+			<div></div>
+			<div></div>
 		</div>
 	</template>
 
