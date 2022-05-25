@@ -1935,6 +1935,7 @@ resizeableDiv.init = () => {
 	}
 
 	// add popup into document
+	div.style.display = "none";
 	document.body.appendChild(div);
 }
 resizeableDiv.show = () => {
