@@ -10,6 +10,7 @@
 **      Author : Luc TORRES
 **     Created : Apr 2022
 *********************************************************************/
+"use strict";
 
 const conf = {
 	language: navigator.language.substring(0, 2),

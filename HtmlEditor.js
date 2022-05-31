@@ -10,6 +10,7 @@
 **      Author : Luc TORRES
 **     Created : Apr 2022
 *********************************************************************/
+"use strict";
 
 // include
 import conf from './HtmlEditorConfig.js';
@@ -1127,7 +1128,7 @@ class Wysiwyg extends CodeEditor {
 			if (i == lsLine.length) break;
 		}
 	
-		this.textarea.value = lsLine.join("\n");
+		return lsLine.join("\n");
 	}
 
 	/**
@@ -1162,7 +1163,7 @@ class Wysiwyg extends CodeEditor {
 		}
 
 		if (this.inCodeMode()) {
-			this.contentEditable.innerText = this.textarea.value;
+			this.contentEditable.innerText = this.parser();
 			this.updateNumRow();
 			this.beautify();
 		}
@@ -1172,11 +1173,6 @@ class Wysiwyg extends CodeEditor {
 
 		this.contentEditable.focus();
 		this.rezise();
-	}
-	
-	beautify() {
-		this.parser();
-		super.beautify();
 	}
 
 	/**
